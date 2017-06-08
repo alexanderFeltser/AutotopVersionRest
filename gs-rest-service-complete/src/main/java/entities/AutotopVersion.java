@@ -1,10 +1,13 @@
-package hello;
+package entities;
 
 public class AutotopVersion {
 	private String serverName;
 	// private Date updateDateTime;
 	private String version;
 	private String updateUser;
+
+	public AutotopVersion() {
+	}
 
 	public AutotopVersion(String serverName, String version, String updateUser) {
 
@@ -44,6 +47,11 @@ public class AutotopVersion {
 
 	public void setUpdateUser(String updateUser) {
 		this.updateUser = updateUser;
+	}
+
+	@Override
+	public String toString() {
+		return "AutotopVersion [serverName=" + serverName + ", version=" + version + ", updateUser=" + updateUser + "]";
 	}
 
 }

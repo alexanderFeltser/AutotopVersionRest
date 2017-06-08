@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import controller.AutotopProperties;
+import entities.ReturnCode;
 import interfaces.IDao;
 
 @Configuration
@@ -62,8 +63,9 @@ public class DbExecutor implements IDao {
 	}
 
 	@Override
-	public void insertNewVersion(String serverName, String version) {
+	public ReturnCode insertNewVersion(String serverName, String version) {
 		Statement stmt = null;
+		ReturnCode retCode = null;
 		int maxUpdateNo = getMaxServerUpdateNo(serverName);
 		maxUpdateNo++;
 		try {
@@ -77,18 +79,22 @@ public class DbExecutor implements IDao {
 			stmt = connection.createStatement();
 			stmt.executeUpdate(query);
 			connection.commit();
+			retCode = new ReturnCode(0, "Inserted ");
 
 		} catch (Exception e) {
+			retCode = new ReturnCode(1, e.getMessage());
 			System.out.println(e);
 		} finally {
 			try {
 				if (stmt != null)
 					stmt.close();
+
 			} catch (Exception e) {
 			}
 			;
 
 		}
+		return retCode;
 
 	}
 

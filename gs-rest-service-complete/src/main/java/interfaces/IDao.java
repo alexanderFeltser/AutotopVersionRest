@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import entities.ReturnCode;
+
 public interface IDao {
 
 	public void endProcess();
@@ -12,7 +14,7 @@ public interface IDao {
 
 	public Map<Integer, List<Object>> getServerCurrentVersion(String string) throws SQLException;
 
-	public void insertNewVersion(String string, String string2);
+	public ReturnCode insertNewVersion(String string, String string2);
 
 	public String getVersionServerName();
 

@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import controller.AutotopProperties;
 import controller.ServerManeger;
+import entities.AutotopVersion;
+import entities.ReturnCode;
+import entities.Url;
 
 @RestController
 public class GreetingController {
@@ -29,13 +33,23 @@ public class GreetingController {
 	private static final String templateKiss = "Целую тебя  %s раз, %s!";
 	private final AtomicLong counter = new AtomicLong();
 
-	@RequestMapping(value = "/gotversion", method = RequestMethod.POST)
-	public void gotNewvVersion(@RequestParam(value = "servername") String serverName,
-			@RequestParam(value = "versionname") String versionName) {
-		srverManeger.postServerVersion(serverName, versionName);
-	}
+	// @RequestMapping(value = "/gotversion", method = RequestMethod.POST)
+	// public void gotNewvVersion(@RequestParam(value = "servername") String
+	// serverName,
+	// @RequestParam(value = "versionname") String versionName) {
+	// srverManeger.postServerVersion(serverName, versionName);
+	// }
 
-	/////////////////////////////////
+	@RequestMapping(value = "/gotversion", method = RequestMethod.POST)
+	public ResponseEntity<Url> gotNewvVersion(@RequestBody AutotopVersion autotopVersion) {
+		// System.out.println("Start gotNewvVersion" + autotopVersion);
+		ReturnCode r = srverManeger.postServerVersion(autotopVersion.getServerName(), autotopVersion.getVersion());
+		if (r.isError()) {
+			return new ResponseEntity<Url>((new Url(r.getErrorMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
+		} else {
+			return new ResponseEntity<Url>(new Url("/gotversion"), HttpStatus.OK);
+		}
+	}
 
 	@RequestMapping("/greeting")
 	public Greeting greeting(@RequestParam(value = "name", defaultValue = "World") String name) {
