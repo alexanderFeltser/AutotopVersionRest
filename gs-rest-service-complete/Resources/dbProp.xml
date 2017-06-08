@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>db settings</comment>
+<entry key="user">testuser</entry>
+<entry key="pass">12345</entry>
+<entry key="url">jdbc:mysql://localhost:3306/hfrf</entry>
+
+<entry key="driver">com.mysql.jdbc.Driver</entry>
+<!--
+?verifyServerCertificate=false&useSSL=true
+<entry key="url">jdbc:as400:190.1.19.197;prompt=false;naming = sql;libraries= entv</entry>
+<entry key="driver">com.ibm.as400.access.AS400JDBCDriver</entry>
+"jdbc:mysql://localhost:3036/hfrf"
+jdbc:mysql//localhost:3036;prompt=false;naming = sql;libraries= hfrf
+dbc:mysql://localhost:3036/hfrf
+-->
+<entry key="batchProceededRows">1000</entry>
+</properties>
