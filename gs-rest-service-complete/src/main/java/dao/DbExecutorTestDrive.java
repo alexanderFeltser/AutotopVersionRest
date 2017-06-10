@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import entities.Command;
 import interfaces.IDao;
 
 public class DbExecutorTestDrive {
@@ -48,6 +49,8 @@ public class DbExecutorTestDrive {
 			try {
 				m = dao.getServerCurrentVersion("autotop_qa");
 				dao.insertNewVersion("autotop_qa", "eng:20.09.00;db:12345;pb:1");
+				dao.insertNewCommand(
+						new Command("autotop_qa", 0, "Comad 1", "Sasha", 0, 0, "No more errors", "Sasha11111:DBA"));
 				System.out.println(dao.getVersionServerName());
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block

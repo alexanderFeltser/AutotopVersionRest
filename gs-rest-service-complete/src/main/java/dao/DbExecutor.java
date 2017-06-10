@@ -1,5 +1,6 @@
 package dao;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -11,11 +12,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import controller.AutotopProperties;
+import entities.Command;
 import entities.ReturnCode;
 import interfaces.IDao;
 
@@ -177,8 +180,73 @@ public class DbExecutor implements IDao {
 
 		}
 		return excel_data;
+	}
+
+	private String surraundByQuotes(String serverName) {
+
+		return "\"" + serverName + "\"";
+	}
+
+	void printResultSet(ResultSetMetaData rsmd, ResultSet rs) throws SQLException {
+
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+
+			if (i > 1)
+				System.out.print(",  ");
+			String columnValue = rs.getString(i);
+			System.out.print(columnValue + " " + rsmd.getColumnName(i));
+			System.out.println("");
+		}
+	}
+
+	@Override
+	public void endProcess() {
+
+		try {
+			if (connection != null) {
+				connection.close();
+				connection = null;
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		;
 
 	}
+
+	private int getMax(String schemaTable, String maxColumn, String whereExpresion) {
+		ResultSet rs = null;
+		Statement stmt = null;
+		String queryString;
+		int maxColumnValue = -1;
+		try {
+			if (connection == null)
+				connection = getConnection();
+			queryString = "Select max(" + maxColumn + ") from " + schemaTable + " where " + whereExpresion;
+			stmt = connection.createStatement();
+
+			rs = stmt.executeQuery(queryString);
+			rs.next();
+			maxColumnValue = rs.getInt(1);
+
+		} catch (Exception e) {
+			System.out.println(e);
+		} finally {
+			try {
+				if (rs != null)
+					rs.close();
+			} catch (Exception e) {
+			}
+			;
+			try {
+				if (stmt != null)
+					stmt.close();
+			} catch (Exception e) {
+			}
+		}
+		return maxColumnValue;
+	}
+	///////////////////////////////// work with version tables //////////////
 
 	@Override
 	public Map<Integer, List<Object>> getServerCurrentVersion(String serverName) throws SQLException {
@@ -224,162 +292,6 @@ public class DbExecutor implements IDao {
 		return updateNo;
 	}
 
-	private String surraundByQuotes(String serverName) {
-
-		return "\"" + serverName + "\"";
-	}
-
-	void printResultSet(ResultSetMetaData rsmd, ResultSet rs) throws SQLException {
-
-		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-
-			if (i > 1)
-				System.out.print(",  ");
-			String columnValue = rs.getString(i);
-			System.out.print(columnValue + " " + rsmd.getColumnName(i));
-			System.out.println("");
-		}
-	}
-
-	// @Override
-	// public int getRowsFetched() {
-	//
-	// return totalFetchedRows;
-	// }
-
-	// @Override
-	// public List<Integer> getColumnTypes(FileImport dbFile) throws
-	// SQLException {
-	//
-	// Statement stmt = null;
-	// ResultSet rs = null;
-	// List<Integer> listMetaDataType = null;
-	//
-	// try {
-	// if (connection == null || connection.isClosed())
-	// connection = getConnection();
-	// stmt = connection.createStatement();
-	// rs = stmt.executeQuery(SQL_SELECT_FROM_TABLE + dbFile.getFileName());
-	// ResultSetMetaData rsmd = rs.getMetaData();
-	// listMetaDataType = new ArrayList<Integer>(rsmd.getColumnCount());
-	// for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-	//
-	// int typeIndex = rsmd.getColumnType(i);
-	//
-	// listMetaDataType.add(rsmd.getColumnType(i));
-	// rsmd.getPrecision(i);
-	// }
-	// } catch (Exception e) {
-	// System.out.println(e);
-	// } finally {
-	// try {
-	// if (rs != null)
-	// rs.close();
-	// } catch (Exception e) {
-	// }
-	// ;
-	// try {
-	// if (stmt != null)
-	// stmt.close();
-	// } catch (Exception e) {
-	// }
-	// ;
-	//
-	// }
-	// return listMetaDataType;
-	// }
-
-	// @Override
-	// public List<Integer> getPrecisionSize(FileImport dbFile) throws
-	// SQLException {
-	//
-	// List<Integer> listPrecisionSize = null;
-	// Statement stmt = null;
-	// ResultSet rs = null;
-	//
-	// try {
-	// if (connection == null || connection.isClosed())
-	// connection = getConnection();
-	// stmt = connection.createStatement();
-	// rs = stmt.executeQuery(SQL_SELECT_FROM_TABLE + dbFile.getFileName());
-	// ResultSetMetaData rsmd = rs.getMetaData();
-	//
-	// listPrecisionSize = new ArrayList<Integer>(rsmd.getColumnCount());
-	// for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-	// listPrecisionSize.add(rsmd.getPrecision(i));
-	// }
-	//
-	// } catch (Exception e) {
-	// System.out.println(e);
-	// } finally {
-	// try {
-	// if (rs != null)
-	// rs.close();
-	// } catch (Exception e) {
-	// }
-	// ;
-	// try {
-	// if (stmt != null)
-	// stmt.close();
-	// } catch (Exception e) {
-	// }
-	// ;
-	//
-	// }
-	// return listPrecisionSize;
-	// }
-
-	// @Override
-	// public int geTotalRows(FileImport dbFile) throws SQLException {
-	// int totalRows = 0;
-	//
-	// Statement stmt = null;
-	// ResultSet rs = null;
-	//
-	// try {
-	// if (connection == null || connection.isClosed())
-	// connection = getConnection();
-	// stmt = connection.createStatement();
-	// rs = stmt.executeQuery(SQL_SELECT_FROM_TABLE + dbFile.getFileName());
-	// while (rs.next()) {
-	// totalRows = rs.getInt(1);
-	// }
-	// } catch (Exception e) {
-	// System.out.println(e);
-	// } finally {
-	// try {
-	// if (rs != null)
-	// rs.close();
-	// } catch (Exception e) {
-	// }
-	// ;
-	// try {
-	// if (stmt != null)
-	// stmt.close();
-	// } catch (Exception e) {
-	// }
-	// ;
-	//
-	// }
-	//
-	// return totalRows;
-	// }
-
-	@Override
-	public void endProcess() {
-
-		try {
-			if (connection != null) {
-				connection.close();
-				connection = null;
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		;
-
-	}
-
 	@Override
 	public String getVersionServerName() {
 
@@ -398,45 +310,270 @@ public class DbExecutor implements IDao {
 
 	}
 
-	// @Override
-	// public List<String> getColumnNames(FileImport dbFile) {
-	//
-	// Statement stmt = null;
-	// ResultSet rs = null;
-	// ArrayList<String> listColumnNames = null;
-	//
-	// try {
-	// if (connection == null)
-	// connection = getConnection();
-	// stmt = connection.createStatement();
-	// rs = stmt.executeQuery(SQL_SELECT_FROM_TABLE + dbFile.getFileName());
-	// ResultSetMetaData rsmd = rs.getMetaData();
-	//
-	// listColumnNames = new ArrayList<String>(rsmd.getColumnCount());
-	//
-	// for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-	//
-	// listColumnNames.add(rsmd.getColumnName(i));
-	// rsmd.getPrecision(i);
-	// }
-	// } catch (Exception e) {
-	// System.out.println(e);
-	// } finally {
-	// try {
-	// if (rs != null)
-	// rs.close();
-	// } catch (Exception e) {
-	// }
-	// ;
-	// try {
-	// if (stmt != null)
-	// stmt.close();
-	// } catch (Exception e) {
-	// }
-	// ;
-	//
-	// }
-	// return listColumnNames;
-	// }
+	///////////////////////////////// work with comands tables //////////////
 
+	@Override
+	public ReturnCode insertNewCommand(Command cmd) {
+		Statement stmt = null;
+		ReturnCode retCode = null;
+		int maxUpdateNo = getMax("hfrf.commands", "command_no", "srvr_name = " + surraundByQuotes(cmd.getServerName()));
+		maxUpdateNo++;
+		try {
+
+			String query;
+			query = "  INSERT INTO hfrf.commands(srvr_name,command_no,comman,user,status,err_code,message,"
+					+ "date_time) VALUES (" + surraundByQuotes(cmd.getServerName()) + ", " + maxUpdateNo + ", "
+					+ surraundByQuotes(cmd.getCommand()) + ", " + surraundByQuotes(cmd.getUser()) + ", " + 0 + ", " + 0
+					+ ", \"\" ," + "now() )";
+			System.out.println("Add new comand: " + query);
+
+			if (connection == null)
+				connection = getConnection();
+			stmt = connection.createStatement();
+			stmt.executeUpdate(query);
+			connection.commit();
+			retCode = new ReturnCode(0, "Inserted ");
+
+		} catch (Exception e) {
+			retCode = new ReturnCode(1, e.getMessage());
+			System.out.println(e);
+		} finally {
+			try {
+				if (stmt != null)
+					stmt.close();
+
+			} catch (Exception e) {
+			}
+			;
+
+		}
+		return retCode;
+
+	}
+
+	@Override
+	public ReturnCode updateCommand(String serverName, int comandNo, String updateString) {
+		Statement stmt = null;
+		ReturnCode retCode = null;
+
+		try {
+
+			String query;
+			query = "  update  hfrf.commands set " + updateString + " where command_no =  " + comandNo;
+
+			if (connection == null)
+				connection = getConnection();
+			stmt = connection.createStatement();
+			stmt.executeUpdate(query);
+			connection.commit();
+			retCode = new ReturnCode(0, "Comand Updated ");
+
+		} catch (Exception e) {
+			retCode = new ReturnCode(1, e.getMessage());
+			System.out.println(e);
+		} finally {
+			try {
+				if (stmt != null)
+					stmt.close();
+
+			} catch (Exception e) {
+			}
+			;
+
+		}
+		return retCode;
+
+	}
+
+	@Override
+	public List<Command> getServerComands(String serverName) throws SQLException {
+
+		String where;
+
+		where = " where srvr_name = " + surraundByQuotes(serverName) + "and status = 0 " + " order by command_no";
+
+		Map<Integer, List<Object>> m = fetchRows("commands", where, 0);
+		List<Command> commands = new ArrayList<Command>();
+		Set<Integer> rows = m.keySet();
+		for (Integer row : rows) {
+			List<Object> l = m.get(row);
+			System.out.println(l);
+			Command cmd = new Command((String) l.get(0), // ServerName
+					(Integer) l.get(1), // comand_no
+					(String) l.get(2), // command
+					(String) l.get(3), // user
+					Integer.parseInt((String) l.get(4)), // status
+					((BigDecimal) l.get(5)).intValue(), // errorCode
+					(String) l.get(6), // message,
+					"");// authentication)
+			commands.add(cmd);
+		}
+
+		return commands;
+	}
 }
+
+// @Override
+// public int getRowsFetched() {
+//
+// return totalFetchedRows;
+// }
+
+// @Override
+// public List<Integer> getColumnTypes(FileImport dbFile) throws
+// SQLException {
+//
+// Statement stmt = null;
+// ResultSet rs = null;
+// List<Integer> listMetaDataType = null;
+//
+// try {
+// if (connection == null || connection.isClosed())
+// connection = getConnection();
+// stmt = connection.createStatement();
+// rs = stmt.executeQuery(SQL_SELECT_FROM_TABLE + dbFile.getFileName());
+// ResultSetMetaData rsmd = rs.getMetaData();
+// listMetaDataType = new ArrayList<Integer>(rsmd.getColumnCount());
+// for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+//
+// int typeIndex = rsmd.getColumnType(i);
+//
+// listMetaDataType.add(rsmd.getColumnType(i));
+// rsmd.getPrecision(i);
+// }
+// } catch (Exception e) {
+// System.out.println(e);
+// } finally {
+// try {
+// if (rs != null)
+// rs.close();
+// } catch (Exception e) {
+// }
+// ;
+// try {
+// if (stmt != null)
+// stmt.close();
+// } catch (Exception e) {
+// }
+// ;
+//
+// }
+// return listMetaDataType;
+// }
+
+// @Override
+// public List<Integer> getPrecisionSize(FileImport dbFile) throws
+// SQLException {
+//
+// List<Integer> listPrecisionSize = null;
+// Statement stmt = null;
+// ResultSet rs = null;
+//
+// try {
+// if (connection == null || connection.isClosed())
+// connection = getConnection();
+// stmt = connection.createStatement();
+// rs = stmt.executeQuery(SQL_SELECT_FROM_TABLE + dbFile.getFileName());
+// ResultSetMetaData rsmd = rs.getMetaData();
+//
+// listPrecisionSize = new ArrayList<Integer>(rsmd.getColumnCount());
+// for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+// listPrecisionSize.add(rsmd.getPrecision(i));
+// }
+//
+// } catch (Exception e) {
+// System.out.println(e);
+// } finally {
+// try {
+// if (rs != null)
+// rs.close();
+// } catch (Exception e) {
+// }
+// ;
+// try {
+// if (stmt != null)
+// stmt.close();
+// } catch (Exception e) {
+// }
+// ;
+//
+// }
+// return listPrecisionSize;
+// }
+
+// @Override
+// public int geTotalRows(FileImport dbFile) throws SQLException {
+// int totalRows = 0;
+//
+// Statement stmt = null;
+// ResultSet rs = null;
+//
+// try {
+// if (connection == null || connection.isClosed())
+// connection = getConnection();
+// stmt = connection.createStatement();
+// rs = stmt.executeQuery(SQL_SELECT_FROM_TABLE + dbFile.getFileName());
+// while (rs.next()) {
+// totalRows = rs.getInt(1);
+// }
+// } catch (Exception e) {
+// System.out.println(e);
+// } finally {
+// try {
+// if (rs != null)
+// rs.close();
+// } catch (Exception e) {
+// }
+// ;
+// try {
+// if (stmt != null)
+// stmt.close();
+// } catch (Exception e) {
+// }
+// ;
+//
+// }
+//
+// return totalRows;
+// }
+
+// @Override
+// public List<String> getColumnNames(FileImport dbFile) {
+//
+// Statement stmt = null;
+// ResultSet rs = null;
+// ArrayList<String> listColumnNames = null;
+//
+// try {
+// if (connection == null)
+// connection = getConnection();
+// stmt = connection.createStatement();
+// rs = stmt.executeQuery(SQL_SELECT_FROM_TABLE + dbFile.getFileName());
+// ResultSetMetaData rsmd = rs.getMetaData();
+//
+// listColumnNames = new ArrayList<String>(rsmd.getColumnCount());
+//
+// for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+//
+// listColumnNames.add(rsmd.getColumnName(i));
+// rsmd.getPrecision(i);
+// }
+// } catch (Exception e) {
+// System.out.println(e);
+// } finally {
+// try {
+// if (rs != null)
+// rs.close();
+// } catch (Exception e) {
+// }
+// ;
+// try {
+// if (stmt != null)
+// stmt.close();
+// } catch (Exception e) {
+// }
+// ;
+//
+// }
+// return listColumnNames;
+// }

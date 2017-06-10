@@ -1,8 +1,9 @@
-package hello;
+package main;
 
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.List;
 //import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -19,11 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 import controller.AutotopProperties;
 import controller.ServerManeger;
 import entities.AutotopVersion;
+import entities.Command;
 import entities.ReturnCode;
 import entities.Url;
 
 @RestController
-public class GreetingController {
+public class ServerController {
 	@Autowired
 	private AutotopProperties prop;
 	@Autowired
@@ -40,6 +42,44 @@ public class GreetingController {
 	// srverManeger.postServerVersion(serverName, versionName);
 	// }
 
+	@RequestMapping(value = "/comandstatus", method = RequestMethod.PUT)
+	public ResponseEntity<Url> comandExequted(@RequestParam(value = "servername") String serverName,
+			@RequestParam(value = "commandno") String commandNo) {
+
+		ReturnCode r = srverManeger.commandExequted(serverName, commandNo);
+		if (r.isError()) {
+			return new ResponseEntity<Url>((new Url(r.getErrorMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
+		} else {
+			return new ResponseEntity<Url>(new Url("/comandstatus"), HttpStatus.OK);
+		}
+	}
+
+	@RequestMapping(value = "/comandnotexequetd", method = RequestMethod.PUT)
+	public ResponseEntity<Url> comandNotExequted(@RequestParam(value = "servername") String serverName,
+			@RequestParam(value = "commandno") String commandNo, @RequestParam(value = "errorNo") String errorNo,
+			@RequestParam(value = "errmesage") String errorMessage) {
+
+		ReturnCode r = srverManeger.commandNotExequted(serverName, commandNo, errorNo, errorMessage);
+		if (r.isError()) {
+			return new ResponseEntity<Url>((new Url(r.getErrorMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
+		} else {
+			return new ResponseEntity<Url>(new Url("/comandstatus"), HttpStatus.OK);
+		}
+	}
+
+	@RequestMapping(value = "/getcomands", method = RequestMethod.GET)
+	public ResponseEntity<List<Command>> getcomands(@RequestParam(value = "servername") String serverName) {
+		List<Command> commands = null;
+		ReturnCode r = srverManeger.getServerComands(serverName);
+		if (r.isError()) {
+
+			return new ResponseEntity<List<Command>>(commands, HttpStatus.INTERNAL_SERVER_ERROR);
+		} else {
+			commands = (List<Command>) r.getObject();
+			return new ResponseEntity<List<Command>>(commands, HttpStatus.OK);
+		}
+	}
+
 	@RequestMapping(value = "/gotversion", method = RequestMethod.POST)
 	public ResponseEntity<Url> gotNewvVersion(@RequestBody AutotopVersion autotopVersion) {
 		// System.out.println("Start gotNewvVersion" + autotopVersion);
@@ -51,10 +91,23 @@ public class GreetingController {
 		}
 	}
 
-	@RequestMapping("/greeting")
-	public Greeting greeting(@RequestParam(value = "name", defaultValue = "World") String name) {
-		return new Greeting(counter.incrementAndGet(), String.format(template, name));
+	@RequestMapping(value = "/addcommand", method = RequestMethod.POST)
+	public ResponseEntity<Url> addNewCommand(@RequestBody Command command) {
+		// System.out.println("Start gotNewvVersion" + autotopVersion);
+		ReturnCode r = srverManeger.addCommand(command);
+		if (r.isError()) {
+			return new ResponseEntity<Url>((new Url(r.getErrorMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
+		} else {
+			return new ResponseEntity<Url>(new Url("/commandno/" + r.getErrorMessage()), HttpStatus.OK);
+		}
 	}
+
+	// @RequestMapping("/greeting")
+	// public Greeting greeting(@RequestParam(value = "name", defaultValue =
+	// "World") String name) {
+	// return new Greeting(counter.incrementAndGet(), String.format(template,
+	// name));
+	// }
 
 	@RequestMapping("/autotopVersion")
 

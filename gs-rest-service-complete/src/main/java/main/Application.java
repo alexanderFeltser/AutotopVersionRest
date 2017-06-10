@@ -1,11 +1,11 @@
-package hello;
+package main;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = { "controller", "interfaces", "dao" }, basePackageClasses = Application.class)
+@ComponentScan(basePackages = { "controller", "interfaces", "dao", "helper" }, basePackageClasses = Application.class)
 public class Application {
 
 	public static void main(String[] args) {

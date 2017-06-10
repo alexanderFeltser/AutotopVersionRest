@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import entities.Command;
 import entities.ReturnCode;
 
 public interface IDao {
@@ -17,5 +18,11 @@ public interface IDao {
 	public ReturnCode insertNewVersion(String string, String string2);
 
 	public String getVersionServerName();
+
+	public ReturnCode insertNewCommand(Command cmd);
+
+	public ReturnCode updateCommand(String serverName, int comandNo, String updateString);
+
+	public List<Command> getServerComands(String serverName) throws SQLException;
 
 }
