@@ -1,0 +1,32 @@
+CREATE TABLE `commands` (
+  `srvr_name` char(50) NOT NULL,
+  `command_no` int(11) NOT NULL,
+  `comman` char(100) DEFAULT NULL,
+  `user` char(10) DEFAULT NULL,
+  `status` char(1) DEFAULT NULL,
+  `err_code` decimal(1,0) DEFAULT NULL,
+  `message` char(100) DEFAULT NULL,
+  `date_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`srvr_name`,`command_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+
+CREATE TABLE `hfpsrvrinf` (
+  `srvr_name` char(50) NOT NULL,
+  `ip` char(19) DEFAULT NULL,
+  `vrsn_srvr` int(11) DEFAULT NULL,
+  PRIMARY KEY (`srvr_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+CREATE TABLE `hfpsrvrvrs` (
+  `srvr_name` char(50) NOT NULL,
+  `update_no` int(11) NOT NULL,
+  `version` char(80) DEFAULT NULL,
+  `date_time` datetime DEFAULT NULL,
+  `update_usr` char(10) DEFAULT NULL,
+  PRIMARY KEY (`srvr_name`,`update_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
