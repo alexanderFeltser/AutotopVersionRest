@@ -32,7 +32,7 @@ public class ServerController {
 	private ServerManeger srverManeger;
 	private static final String template = "Hello %s time, %s!";
 	private static final String templateMorning = "Доброе утро %s раз, %s!";
-	private static final String templateKiss = "Целую тебя  %s раз, %s!";
+	private static final String templateKiss = "chmock";
 	private final AtomicLong counter = new AtomicLong();
 
 	// @RequestMapping(value = "/gotversion", method = RequestMethod.POST)
@@ -80,6 +80,8 @@ public class ServerController {
 		}
 	}
 
+	// Client reports it's current version after new version have been got on
+	// client.
 	@RequestMapping(value = "/gotversion", method = RequestMethod.POST)
 	public ResponseEntity<Url> gotNewvVersion(@RequestBody AutotopVersion autotopVersion) {
 		// System.out.println("Start gotNewvVersion" + autotopVersion);
@@ -109,16 +111,19 @@ public class ServerController {
 	// name));
 	// }
 
-	@RequestMapping("/autotopVersion")
+	@RequestMapping(value = "/getserverversion", method = RequestMethod.GET)
+	public ResponseEntity<AutotopVersion> getServerVersion(@RequestParam(value = "servername") String serverNname) {
+		// Date date = new Date(System.currentTimeMillis());
+		// AutotopVersion a = new AutotopVersion("Autotp-New1",
+		// "engine:2.5.8.0,pb:23.14,DB:3235", "Eti");
+		ReturnCode r = srverManeger.getServerVersion(serverNname);
 
-	public ResponseEntity<AutotopVersion> autotopVersion(@RequestParam(value = "serverNname") String serverNname) {
-		Date date = new Date(System.currentTimeMillis());
-		AutotopVersion a = new AutotopVersion("Autotp-New1", "engine:2.5.8.0,pb:23.14,DB:3235", "Eti");
-		// AutotopVersion a = new AutotopVersion();
-		// a.setServerName("Autotp-New1");
-		// a.setVersion("engine:2.5.8.0,pb:23.14,DB:3235");
-		// a.setUpdateUser("Eti");
-		return new ResponseEntity<AutotopVersion>(a, HttpStatus.OK);
+		if (r.isError()) {
+			return new ResponseEntity<AutotopVersion>(new AutotopVersion(), HttpStatus.INTERNAL_SERVER_ERROR);
+		} else {
+			return new ResponseEntity<AutotopVersion>((AutotopVersion) r.getObject(), HttpStatus.OK);
+		}
+
 	}
 
 	@RequestMapping("/chmok")

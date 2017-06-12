@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import controller.AutotopProperties;
+import entities.AutotopVersion;
 import entities.Command;
 import entities.ReturnCode;
 import interfaces.IDao;
@@ -310,6 +312,24 @@ public class DbExecutor implements IDao {
 
 	}
 
+	@Override
+	public AutotopVersion getServerVersion(String serverName) throws SQLException {
+		String where;
+		AutotopVersion version = null;
+		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		try {
+			Map<Integer, List<Object>> m = getServerCurrentVersion(serverName);
+			version = new AutotopVersion(serverName, (Integer) m.get(1).get(1), (String) m.get(1).get(2),
+					sdfDate.format(m.get(1).get(3)), (String) m.get(1).get(4));
+		} catch (Exception e) {
+			System.out.println("Error : Version of Server " + serverName + "not found in table hfrf.hfpsrvrinf: "
+					+ e.getMessage());
+			// e.printStackTrace();
+		}
+
+		return version;
+	}
+
 	///////////////////////////////// work with comands tables //////////////
 
 	@Override
@@ -411,6 +431,7 @@ public class DbExecutor implements IDao {
 
 		return commands;
 	}
+
 }
 
 // @Override

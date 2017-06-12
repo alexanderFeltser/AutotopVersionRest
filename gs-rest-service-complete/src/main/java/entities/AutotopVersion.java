@@ -2,19 +2,29 @@ package entities;
 
 public class AutotopVersion {
 	private String serverName;
-	// private Date updateDateTime;
+	private String updateDateTime;
+	private int updateNo;
 	private String version;
 	private String updateUser;
 
 	public AutotopVersion() {
 	}
 
-	public AutotopVersion(String serverName, String version, String updateUser) {
+	public AutotopVersion(String serverName, int updateNo, String version, String updateDateTime, String updateUser) {
 
 		this.serverName = serverName;
-		// this.updateDateTime = updateDateTime;
+		this.setUpdateDateTime(updateDateTime);
 		this.version = version;
 		this.updateUser = updateUser;
+		this.updateNo = updateNo;
+	}
+
+	public int getUpdateNo() {
+		return updateNo;
+	}
+
+	public void setUpdateNo(int updateNo) {
+		this.updateNo = updateNo;
 	}
 
 	public String getServerName() {
@@ -52,6 +62,21 @@ public class AutotopVersion {
 	@Override
 	public String toString() {
 		return "AutotopVersion [serverName=" + serverName + ", version=" + version + ", updateUser=" + updateUser + "]";
+	}
+
+	/**
+	 * @return the updateDateTime
+	 */
+	public String getUpdateDateTime() {
+		return updateDateTime;
+	}
+
+	/**
+	 * @param updateDateTime
+	 *            the updateDateTime to set
+	 */
+	public void setUpdateDateTime(String updateDateTime) {
+		this.updateDateTime = updateDateTime;
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import entities.AutotopVersion;
 import entities.Command;
 import entities.ReturnCode;
 import interfaces.AuthenticationAlgorithm;
@@ -71,6 +72,27 @@ public class ServerManeger {
 				r.setObject(command);
 			} else {
 				r = new ReturnCode(0, "No commands found.");
+			}
+			return r;
+		} catch (NumberFormatException e) {
+			return new ReturnCode(1, e.getMessage());
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			return new ReturnCode(1, e.getMessage());
+		}
+	}
+
+	public ReturnCode getServerVersion(String serverName) {
+		ReturnCode r;
+		AutotopVersion version = null;
+		try {
+			version = dao.getServerVersion(serverName);
+			if (version != null) {
+				r = new ReturnCode(0, "Fetched currient Version");
+				r.setObject(version);
+			} else {
+				r = new ReturnCode(0, "No version found.");
 			}
 			return r;
 		} catch (NumberFormatException e) {

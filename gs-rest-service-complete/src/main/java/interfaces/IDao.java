@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import entities.AutotopVersion;
 import entities.Command;
 import entities.ReturnCode;
 
@@ -24,5 +25,7 @@ public interface IDao {
 	public ReturnCode updateCommand(String serverName, int comandNo, String updateString);
 
 	public List<Command> getServerComands(String serverName) throws SQLException;
+
+	public AutotopVersion getServerVersion(String serverName) throws SQLException;
 
 }
