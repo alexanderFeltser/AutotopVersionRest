@@ -16,4 +16,8 @@ public class Url {
 		this.url = url;
 	}
 
+	public Url() {
+
+	}
+
 }

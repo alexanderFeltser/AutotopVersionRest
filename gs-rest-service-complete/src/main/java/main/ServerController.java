@@ -7,6 +7,7 @@ import java.util.List;
 //import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import controller.AutotopProperties;
 import controller.ServerManeger;
 import entities.AutotopVersion;
 import entities.Command;
+import entities.Log4J2XmlConf;
 import entities.ReturnCode;
 import entities.Url;
 
@@ -34,6 +36,7 @@ public class ServerController {
 	private static final String templateMorning = "Доброе утро %s раз, %s!";
 	private static final String templateKiss = "chmock";
 	private final AtomicLong counter = new AtomicLong();
+	private static Logger logger = Log4J2XmlConf.getLogger();
 
 	// @RequestMapping(value = "/gotversion", method = RequestMethod.POST)
 	// public void gotNewvVersion(@RequestParam(value = "servername") String
@@ -84,7 +87,7 @@ public class ServerController {
 	// client.
 	@RequestMapping(value = "/gotversion", method = RequestMethod.POST)
 	public ResponseEntity<Url> gotNewvVersion(@RequestBody AutotopVersion autotopVersion) {
-		// System.out.println("Start gotNewvVersion" + autotopVersion);
+		logger.info(" >>>>>>>  Start gotNewvVersion  got message:  " + autotopVersion);
 		ReturnCode r = srverManeger.postServerVersion(autotopVersion.getServerName(), autotopVersion.getVersion());
 		if (r.isError()) {
 			return new ResponseEntity<Url>((new Url(r.getErrorMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -95,7 +98,7 @@ public class ServerController {
 
 	@RequestMapping(value = "/addcommand", method = RequestMethod.POST)
 	public ResponseEntity<Url> addNewCommand(@RequestBody Command command) {
-		// System.out.println("Start gotNewvVersion" + autotopVersion);
+		logger.info(" >>>>>>>  Addcommand service called");
 		ReturnCode r = srverManeger.addCommand(command);
 		if (r.isError()) {
 			return new ResponseEntity<Url>((new Url(r.getErrorMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -116,6 +119,7 @@ public class ServerController {
 		// Date date = new Date(System.currentTimeMillis());
 		// AutotopVersion a = new AutotopVersion("Autotp-New1",
 		// "engine:2.5.8.0,pb:23.14,DB:3235", "Eti");
+		logger.info(" >>>>>>>  /getserverversion service called");
 		ReturnCode r = srverManeger.getServerVersion(serverNname);
 
 		if (r.isError()) {
@@ -128,12 +132,14 @@ public class ServerController {
 
 	@RequestMapping("/chmok")
 	public @ResponseBody String jopa(@RequestParam(value = "name", defaultValue = "World") String name) {
+		logger.info(" >>>>>>>  /chmok service called");
 		counter.incrementAndGet();
 		return String.format(templateKiss, counter.toString(), name);
 	}
 
 	@RequestMapping("/morning")
 	public @ResponseBody String morning(@RequestParam(value = "name", defaultValue = "World") String name) {
+		logger.info(" >>>>>>>  /morning service called");
 		counter.incrementAndGet();
 		System.out.println(prop.getDbProp().getProperty("url"));
 		return String.format(templateMorning, counter.toString(), name);
@@ -141,12 +147,13 @@ public class ServerController {
 
 	@RequestMapping("/kuku")
 	public @ResponseBody String kuku(@RequestParam(value = "name", defaultValue = "World") String name) {
-
+		logger.info(" >>>>>>> /kuku service called");
 		return String.format("How are you %s ? ", name);
 	}
 
 	@RequestMapping("/date")
 	public @ResponseBody String date(@RequestParam(value = "name", defaultValue = "World") String name) {
+		logger.info(" >>>>>>>  /date service called");
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date(System.currentTimeMillis());
 		System.out.println(dateFormat.format(date));

@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,6 +34,7 @@ public class DbExecutor implements IDao {
 	int totalFetchedRows = 0;
 	static List<Driver> drivers = new ArrayList<Driver>();
 	Connection connection = null;
+	private static Logger logger = LogManager.getLogger();
 
 	final String SQL_SELECT_FROM_TABLE = "Select * from hfrf.";
 	final String SQL_COUNT_FROM_TABLE = "Select count(*) from ";
@@ -44,14 +47,12 @@ public class DbExecutor implements IDao {
 	}
 
 	public DbExecutor(String url, String driver, String user, String pass, int batchProceededRows) throws Exception {
-
 		this.batchProceededRows = batchProceededRows;
 		try {
 			Class.forName(driver);
 			drivers.add(DriverManager.getDriver(url));
 			for (Driver driverFound : drivers) {
 				if (driverFound.acceptsURL(url)) {
-
 					this.url = url;
 					this.driver = driver;
 					this.user = user;
@@ -61,9 +62,9 @@ public class DbExecutor implements IDao {
 			}
 			connection = getConnection();
 		} catch (Exception exc) {
-			System.out.println("User : " + this.user);
-			System.out.println("Url : " + this.url);
-			System.out.println("Connection Fault: " + exc.getMessage());
+			logger.info("User : " + this.user);
+			logger.info("Url : " + this.url);
+			logger.fatal("Connection Fault: " + exc.getMessage());
 		}
 	}
 
@@ -85,10 +86,11 @@ public class DbExecutor implements IDao {
 			stmt.executeUpdate(query);
 			connection.commit();
 			retCode = new ReturnCode(0, "Inserted ");
-
+			logger.info("Inserted :" + surraundByQuotes(serverName) + ", " + maxUpdateNo + ", "
+					+ surraundByQuotes(version));
 		} catch (Exception e) {
 			retCode = new ReturnCode(1, e.getMessage());
-			System.out.println(e);
+			logger.fatal(e.getMessage());
 		} finally {
 			try {
 				if (stmt != null)
@@ -165,7 +167,7 @@ public class DbExecutor implements IDao {
 			}
 
 		} catch (Exception e) {
-			System.out.println(e);
+			logger.fatal(e.getMessage());
 		} finally {
 			try {
 				if (rs != null)
@@ -210,7 +212,7 @@ public class DbExecutor implements IDao {
 				connection = null;
 			}
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			logger.fatal(e.getMessage());
 		}
 		;
 
@@ -232,7 +234,7 @@ public class DbExecutor implements IDao {
 			maxColumnValue = rs.getInt(1);
 
 		} catch (Exception e) {
-			System.out.println(e);
+			logger.fatal(e.getMessage());
 		} finally {
 			try {
 				if (rs != null)
@@ -244,6 +246,7 @@ public class DbExecutor implements IDao {
 				if (stmt != null)
 					stmt.close();
 			} catch (Exception e) {
+
 			}
 		}
 		return maxColumnValue;
@@ -277,7 +280,7 @@ public class DbExecutor implements IDao {
 			updateNo = rs.getInt(1);
 
 		} catch (Exception e) {
-			System.out.println(e);
+			logger.fatal(e.getMessage());
 		} finally {
 			try {
 				if (rs != null)
@@ -305,7 +308,7 @@ public class DbExecutor implements IDao {
 		try {
 			m = fetchRows("hfpsrvrinf", where, 0);
 		} catch (Exception e) {
-			System.out.println("Error : Version Server not found in table hfrf.hfpsrvrinf");
+			logger.fatal("Error : Version Server not found in table hfrf.hfpsrvrinf");
 			e.printStackTrace();
 		}
 		return (String) m.get(1).get(1);
@@ -321,12 +324,13 @@ public class DbExecutor implements IDao {
 			Map<Integer, List<Object>> m = getServerCurrentVersion(serverName);
 			version = new AutotopVersion(serverName, (Integer) m.get(1).get(1), (String) m.get(1).get(2),
 					sdfDate.format(m.get(1).get(3)), (String) m.get(1).get(4));
+			logger.info("Version of " + serverName + " is " + version);
+
 		} catch (Exception e) {
-			System.out.println("Error : Version of Server " + serverName + "not found in table hfrf.hfpsrvrinf: "
+			logger.fatal("Error : Version of Server " + serverName + "not found in table hfrf.hfpsrvrinf: "
 					+ e.getMessage());
 			// e.printStackTrace();
 		}
-
 		return version;
 	}
 
@@ -345,7 +349,7 @@ public class DbExecutor implements IDao {
 					+ "date_time) VALUES (" + surraundByQuotes(cmd.getServerName()) + ", " + maxUpdateNo + ", "
 					+ surraundByQuotes(cmd.getCommand()) + ", " + surraundByQuotes(cmd.getUser()) + ", " + 0 + ", " + 0
 					+ ", \"\" ," + "now() )";
-			System.out.println("Add new comand: " + query);
+			logger.info("Add new comand: " + query);
 
 			if (connection == null)
 				connection = getConnection();
@@ -353,10 +357,10 @@ public class DbExecutor implements IDao {
 			stmt.executeUpdate(query);
 			connection.commit();
 			retCode = new ReturnCode(0, "Inserted ");
-
+			logger.info("Command for  " + cmd.getServerName() + " inserted in DB : " + cmd.getCommand());
 		} catch (Exception e) {
 			retCode = new ReturnCode(1, e.getMessage());
-			System.out.println(e);
+			logger.fatal(e.getMessage());
 		} finally {
 			try {
 				if (stmt != null)
@@ -377,20 +381,18 @@ public class DbExecutor implements IDao {
 		ReturnCode retCode = null;
 
 		try {
-
 			String query;
 			query = "  update  hfrf.commands set " + updateString + " where command_no =  " + comandNo;
-
 			if (connection == null)
 				connection = getConnection();
 			stmt = connection.createStatement();
 			stmt.executeUpdate(query);
 			connection.commit();
 			retCode = new ReturnCode(0, "Comand Updated ");
-
+			logger.info("Comand for " + serverName + " inserted  in DB : " + updateString);
 		} catch (Exception e) {
 			retCode = new ReturnCode(1, e.getMessage());
-			System.out.println(e);
+			logger.fatal(e.getMessage());
 		} finally {
 			try {
 				if (stmt != null)
